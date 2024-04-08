@@ -369,6 +369,7 @@
 "Assets/Scripts/GameManager.cs"
 "Assets/Scripts/Grass.cs"
 "Assets/Scripts/PlayerController.cs"
+"Assets/Scripts/rainManager.cs"
 "Assets/Scripts/SlimeA.cs"
 -langversion:9.0
 
