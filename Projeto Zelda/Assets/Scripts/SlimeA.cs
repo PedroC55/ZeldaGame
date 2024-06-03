@@ -12,7 +12,7 @@ public class SlimeA : MonoBehaviour
 
     private bool isDead;
 
-    public enemyState state;   
+    public enemyState state;
     private int rand;
 
 
@@ -41,7 +41,7 @@ public class SlimeA : MonoBehaviour
     {
         StateManager();
 
-        if(agent.desiredVelocity.magnitude >= 0.1f)
+        if (agent.desiredVelocity.magnitude >= 0.1f)
         {
             iswalk = true;
         }
@@ -60,12 +60,12 @@ public class SlimeA : MonoBehaviour
 
     void GetHit(int amount)
     {
-        
-        if(isDead == true) { return; }
+
+        if (isDead == true) { return; }
 
         HP -= amount;
 
-        if(HP > 0)
+        if (HP > 0)
         {
             ChangeState(enemyState.FURY);
             anim.SetTrigger("GetHit");
@@ -73,11 +73,12 @@ public class SlimeA : MonoBehaviour
         }
         else
         {
+            ChangeState(enemyState.DEAD);
             anim.SetTrigger("Die");
             StartCoroutine("Died");
         }
 
-        
+
     }
 
     IEnumerator Died()
@@ -89,9 +90,10 @@ public class SlimeA : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        
 
-        if(other.gameObject.tag == "Player")
+        if(_GameManager.gameState != GameState.GAMEPLAY) { return; }
+
+        if (other.gameObject.tag == "Player")
         {
             isPlayerVisible = true;
             if (state == enemyState.IDLE || state == enemyState.PATROL)
@@ -105,12 +107,17 @@ public class SlimeA : MonoBehaviour
     {
         if (other.gameObject.tag == "Player")
         {
-            isPlayerVisible=false;
+            isPlayerVisible = false;
         }
     }
     void StateManager()
     {
-        
+
+        if(_GameManager.gameState == GameState.DEAD && (state == enemyState.FOLLOW || state == enemyState.FURY || state == enemyState.ALERT))
+        {
+            ChangeState(enemyState.IDLE);
+        }
+
         switch (state)
         {
 
@@ -123,7 +130,7 @@ public class SlimeA : MonoBehaviour
                 destination = _GameManager.player.position;
                 agent.destination = destination;
 
-                if(agent.remainingDistance <= agent.stoppingDistance)
+                if (agent.remainingDistance <= agent.stoppingDistance)
                 {
                     Attack();
                 }
@@ -139,7 +146,7 @@ public class SlimeA : MonoBehaviour
                 }
                 break;
 
-            case enemyState.PATROL: {  break; }
+            case enemyState.PATROL: { break; }
         }
     }
 
@@ -147,15 +154,15 @@ public class SlimeA : MonoBehaviour
     {
         StopAllCoroutines();  // Encerra todas as Coroutines
         isalert = false;
-        
-        
+
+
         switch (newState)
         {
             case enemyState.IDLE:
                 agent.stoppingDistance = 0;
                 destination = transform.position;
                 agent.destination = destination;
-                
+
                 StartCoroutine("IDLE");
                 break;
 
@@ -174,7 +181,7 @@ public class SlimeA : MonoBehaviour
                 agent.destination = destination;
 
                 StartCoroutine("PATROL");
-                
+
                 break;
 
             case enemyState.FURY:
@@ -185,9 +192,15 @@ public class SlimeA : MonoBehaviour
                 break;
 
             case enemyState.FOLLOW:
-                
+
                 agent.stoppingDistance = _GameManager.slimedistancetoattack;
-                
+
+                break;
+
+            case enemyState.DEAD:
+                destination = transform.position;
+                agent.destination = destination;
+
                 break;
         }
 
@@ -215,7 +228,7 @@ public class SlimeA : MonoBehaviour
     {
         yield return new WaitForSeconds(_GameManager.slimeAlertTime);
 
-        if(isPlayerVisible == true)
+        if (isPlayerVisible == true)
         {
             ChangeState(enemyState.FOLLOW);
         }
@@ -224,7 +237,7 @@ public class SlimeA : MonoBehaviour
             StayStill(10);
         }
 
-        
+
     }
 
     IEnumerator ATTACK()
@@ -237,12 +250,12 @@ public class SlimeA : MonoBehaviour
     {
         if (Rand() <= yes)
         {
-            print("Idle");
+            
             ChangeState(enemyState.IDLE);
         }
         else
         {
-            print("Patrol");
+            
             ChangeState(enemyState.PATROL);
         }
     }
@@ -254,7 +267,7 @@ public class SlimeA : MonoBehaviour
 
     void Attack()
     {
-        if(isAttack == false && isPlayerVisible == true && agent.remainingDistance <= agent.stoppingDistance)
+        if (isAttack == false && isPlayerVisible == true && agent.remainingDistance <= agent.stoppingDistance)
         {
             isAttack = true;
             anim.SetTrigger("Attack");
@@ -271,12 +284,12 @@ public class SlimeA : MonoBehaviour
 
     void LookAt()
     {
-  
+
 
         Vector3 lookDirection = (_GameManager.player.position - transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(lookDirection);
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, _GameManager.slimeLookAtSpeed * Time.deltaTime);
-        
+
     }
 
 

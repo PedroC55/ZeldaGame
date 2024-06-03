@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private GameManager _GameManager;
     private CharacterController controller;
     private Animator animator;
 
@@ -34,13 +35,16 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        _GameManager = FindObjectOfType(typeof(GameManager)) as GameManager;
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
-    } 
+    }
 
     // Update is called once per frame
     void Update()
     {
+        if(_GameManager.gameState != GameState.GAMEPLAY) { return; }
+
         Inputs();
 
         MoveCharacter();
@@ -52,7 +56,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.tag == "TakeDamage")
+        if (other.gameObject.tag == "TakeDamage")
         {
             GetHit(1);
         }
@@ -70,14 +74,19 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetBool("Attack 0", false);
             numAttacks = 0;
+            
+
         }
 
         if (Input.GetButtonDown("Fire1") && isAttack == false)
         {
-            
+
             Attack();
             numAttacks = numAttacks + 1;
+            
         }
+
+        
 
     }
 
@@ -89,10 +98,11 @@ public class PlayerController : MonoBehaviour
 
         hitInfo = Physics.OverlapSphere(hitBox.position, hitRange, hitMask);
 
-        foreach(Collider c in hitInfo)
+        foreach (Collider c in hitInfo)
         {
             c.gameObject.SendMessage("GetHit", amountDmg, SendMessageOptions.DontRequireReceiver);
         }
+        
     }
 
     // MÉTODO RESPONSAVEL POR MOVER O PERSONAGEM
@@ -128,12 +138,14 @@ public class PlayerController : MonoBehaviour
     void GetHit(int ammount)
     {
         HP -= ammount;
-        if(HP > 0)
+        if (HP > 0)
         {
             animator.SetTrigger("Hit");
+            isAttack = false;
         }
         else
         {
+            _GameManager.ChangeGameState(GameState.DEAD);
             animator.SetTrigger("Die");
         }
     }

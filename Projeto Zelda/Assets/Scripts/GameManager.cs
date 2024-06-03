@@ -6,11 +6,18 @@ using UnityEngine.Rendering.PostProcessing;
 
 public enum enemyState
 {
-    IDLE, ALERT, PATROL, FOLLOW, FURY
+    IDLE, ALERT, PATROL, FOLLOW, FURY, DEAD
+}
+
+public enum GameState
+{
+    GAMEPLAY, DEAD
 }
 
 public class GameManager : MonoBehaviour
 {
+
+    public GameState gameState;
     public Transform player;
 
     [Header("Slime IA")]
@@ -109,5 +116,11 @@ public class GameManager : MonoBehaviour
                 postB.weight = 0;
                 break;
         }
+    }
+
+
+    public void ChangeGameState(GameState newState)
+    {
+        gameState = newState;
     }
 }
