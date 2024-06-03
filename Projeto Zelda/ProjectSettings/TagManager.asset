@@ -7,6 +7,7 @@ TagManager:
   - CamTrigger
   - slimeHitBox
   - TakeDamage
+  - "Colet\xE1vel"
   layers:
   - Default
   - TransparentFX
